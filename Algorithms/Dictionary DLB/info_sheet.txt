@@ -10,25 +10,29 @@ Name:
 Alec Trievel
 
 Lecture section:  
-Mon/Wed 9:30 am non-writing
+9:30 am Mon/Wed non-writing
 
 Recitation day and time:  
 Friday 3pm
 
 Assignment #:  
-5
+1
 
-Program due date:
-4/21/2017  
+Program due date:  
+2/9/17
 
 Handed in date:  
-4/6/2017
+2/9/17
 
 Source code file name(s):
-RsaKeyGen.java
-RsaSign.java
+pw_check.java
+DLB_Trie.java
+DLB_Node.java
+Symbol_Table.java
+Symbol.java
 
 Other file name(s) (if relevant):
+ST_approach.txt
 
 Does your program run without error?:
 Yes
@@ -37,5 +41,6 @@ If not, what is/are the error(s) and which parts of your program run
 correctly?:
 
 Additional comments to the grader:
-
-
+There are no errors, but generating good passwords takes pretty long (4 - 5 minutes) due to the recursive approach I took. 
+It still works, however. Additionally, I did not have time to implement the 10 suggestions when a user enters a password not found 
+in all_passwords.txt. However, it still suggests 10 passwords when they enter a password of an invalid format.

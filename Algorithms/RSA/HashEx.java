@@ -1,7 +1,6 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 
 public class HashEx {
@@ -21,15 +20,14 @@ public class HashEx {
 			// generate a has of the file
 			byte[] digest = md.digest();
 
-			// convert the bite string to a printable hex representation
-			// note that conversion to biginteger will remove any leading 0s in the bytes of the array!
-			String result = new BigInteger(1, digest).toString(16);
-
-			// print the hex representation
-			System.out.println(result);
-		}
-		catch(Exception e) {
+			// print each byte in hex
+			for (byte b : digest) {
+				System.out.print(String.format("%02x", b));
+			}
+			System.out.println();
+		} catch(Exception e) {
 			System.out.println(e.toString());
 		}
 	}
 }
+

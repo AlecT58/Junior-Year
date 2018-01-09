@@ -10,25 +10,28 @@ Name:
 Alec Trievel
 
 Lecture section:  
-Mon/Wed 9:30 am non-writing
+Mon/Wed 9:30 am
 
 Recitation day and time:  
 Friday 3pm
 
 Assignment #:  
-5
+3
 
 Program due date:
-4/21/2017  
+3/18/2017  
 
 Handed in date:  
-4/6/2017
+3/18/2017
 
 Source code file name(s):
-RsaKeyGen.java
-RsaSign.java
+CarTracker.java
+CarData.java
+CarList.java
+MinPQ.java
 
 Other file name(s) (if relevant):
+documentation.txt
 
 Does your program run without error?:
 Yes

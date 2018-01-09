@@ -1,0 +1,15 @@
+For my symbol table, I decided to implement a modified version of a HashTable using single chaining. The inspiration for this data structure comes from our textbook and class discussions.
+
+There is an initial array which holds the first Nodes of the individual "chains." The array size is 6 for no particular reason; I just felt like it could be the most optimal. 
+The array resizes (double) after the chains become too long (data is sparse), and the chains are also repositioned to ensure that the search times are optimal. 
+Searching, inserting, and deleting are O(m) where m is a constant such that m = number links in the table. This is because each time we search for a value, we drop down a "level" of the table 
+while also stepping along the links of the chains. As the table becomes more populated, all the operations tend towards O(n). This is a common feature among all HashTables I am aware of, 
+so I feel as if my implementation is a success.
+
+The main reason for choosing this data structure, however, is for its hash function relative to the input. Since no two words in the English language are the same, a proper hash function will
+guarantee perfect hashing, and thus prevent any collisions from occurring. In class we mentioned that one of the biggest downfalls of a HashTable was collisions occurring. Since the 
+Java System.hashCode() function does not guarantee unique hashcodes, calling my hash function perfect would be a lie, but it gets pretty close. Additionally, since the passwords are restricted in 
+certain ways (pruning rules), the symbol table will be relatively small compared to without the restrictions, so the chance of collision/resizing is small.
+
+
+

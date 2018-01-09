@@ -10,25 +10,25 @@ Name:
 Alec Trievel
 
 Lecture section:  
-Mon/Wed 9:30 am non-writing
+Mon/Wed 9:30 am
 
 Recitation day and time:  
 Friday 3pm
 
 Assignment #:  
-5
+2
 
 Program due date:
-4/21/2017  
+2/26/2017  
 
 Handed in date:  
-4/6/2017
+2/25/2017
 
 Source code file name(s):
-RsaKeyGen.java
-RsaSign.java
+MyLZW.java
 
 Other file name(s) (if relevant):
+results.txt
 
 Does your program run without error?:
 Yes
@@ -37,5 +37,10 @@ If not, what is/are the error(s) and which parts of your program run
 correctly?:
 
 Additional comments to the grader:
+
+
+
+
+
 
 
