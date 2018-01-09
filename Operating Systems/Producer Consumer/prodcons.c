@@ -6,24 +6,25 @@
 */
 
 #include <sys/types.h>
-#include <sys/list.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/unistd.h>
 #include <sys/mman.h>
 
-void cs1550_down(struct cs1550_sem *sem),  cs1550_up(struct cs1550_sem *sem), initilaize_pointers(int buffSize);
-
-#define CONINTUE  1
-
 struct cs1550_sem
 {
-	int count;
-	struct node *head;
-	struct node *tail;
-}
+        int count;
+        struct semNode *head;
+        struct semNode *tail;
+};
 
-void *BASE_PTR;							//the shared maemory for the threads created by fork()
+void cs1550_down(struct cs1550_sem *sem); 
+void cs1550_up(struct cs1550_sem *sem); 
+void initilaize_pointers(int buffSize);
+
+#define CONTINUE  1
+
+void *BASE_PTR;							//the shared memory for the threads created by fork()
 struct cs1550_sem *empty;			//the empty buffer 
 struct cs1550_sem *full;					//the full buffer
 struct cs1550_sem *lock;				//the lock that acts as our mutex
@@ -49,17 +50,17 @@ void main(int argc, char *argv[])
 	bufferLength = atoi(argv[3]);
 	int INT_MAP_SIZE = (bufferLength + 3) * sizeof(int);	
 
-	 *BASE_PTR = (void *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);		//mapped memory for the empty/full/"lock" semaphores to share
-	 *SHARED_PTR = (void *) mmap(NULL, INT_MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);	//mapped memory for the buffer to be accessed by the prods/cons 
+	 BASE_PTR = (void *) mmap(NULL, MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);		//mapped memory for the empty/full/"lock" semaphores to share
+	 SHARED_PTR = (void *) mmap(NULL, INT_MAP_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);	//mapped memory for the buffer to be accessed by the prods/cons 
 	 
 	 //below will initilaize the pointers with the correct amount of memory  
-	 *empty = (struct cs1550_sem*) BASE_PTR;
-	 *full = (struct cs1550_sem*) BASE_PTR + 1;
-	 *lock = (struct cs1550_sem*) BASE_PTR + 2;
-	 *bufferLength_ptr = (int *)  SHARED_PTR;
-	 *producer_ptr = (int *)  SHARED_PTR + 1;
-	 *consumer_ptr = (int *)  SHARED_PTR + 2;
-	 *bufferData_ptr = (int *)  SHARED_PTR + 3; 
+	 empty = (struct cs1550_sem*) BASE_PTR;
+	 full = (struct cs1550_sem*) BASE_PTR + 1;
+	 lock = (struct cs1550_sem*) BASE_PTR + 2;
+	 bufferLength_ptr = (int *)  SHARED_PTR;
+	 producer_ptr = (int *)  SHARED_PTR + 1;
+	 consumer_ptr = (int *)  SHARED_PTR + 2;
+	 bufferData_ptr = (int *)  SHARED_PTR + 3; 
 	 initilaize_pointers(bufferLength);
 	//end initilaization
 	
@@ -70,50 +71,50 @@ void main(int argc, char *argv[])
 	{
 		int pancake;
 		pid_t pid;
-		pid = fork();
+		pid = fork();	//creates the new child process
 		
 		if(pid == 0)
 		{
-			while(CONTINUE)
+			while(CONTINUE)		//loops forever until interupt occurs
 			{
-				down(empty);
-				down(lock);
+				cs1550_down(empty);
+				cs1550_down(lock);
 				
-				pancake = *producer;
-				bufferData_ptr[*bufferLength_ptr] = pancake;
-				int producerNum = counter + 'A';
+				pancake = *producer_ptr;	//produces a new pancake
+				bufferData_ptr[*bufferLength_ptr] = pancake; //sets the buffer data to the new pancake produced
+				int producerNum = counter + 'A';	//ASCII offset of 65 so character is a letter
 				printf("Chef %c Produced: Pancake%d\n",  producerNum, pancake);
 				
-				*producer_ptr = (*producer_ptr + 1) % *bufferLength_ptr;
+				*producer_ptr = (*producer_ptr + 1) % *bufferLength_ptr;	//increments producer, makes sure the value is of acceptbale size by taking the remainder from the buffer length
 				
-				up(lock);
-				up(empty);
+				cs1550_up(lock);
+				cs1550_up(empty);
 			}
 		}
 	}
 	
 	//below is the implementation for the consumer 
-	for(counter = 0; counter < consumer; counter++)
+	for(counter = 0; counter < consumers; counter++)
 	{
 		int pancake;
 		pid_t pid;
-		pid = fork();
+		pid = fork();	//creates the new child process
 		
 		if(pid == 0)
 		{
-			while(CONTINUE)
+			while(CONTINUE)		//looks forever until interrupt occurs 
 			{
-				down(full);
-				down(lock);
+				cs1550_down(full);
+				cs1550_down(lock);
 				
-				pancake = *bufferData_ptr[*consumer_ptr];
-				int consumerNum = counter + 'A';
+				pancake = bufferData_ptr[*consumer_ptr];	//takes a pancake from the buffer
+				int consumerNum = counter + 'A';		//ASCII offset of 65 so character is a letter
 				printf("Consumer %c Consumed: Pancake%d\n",  consumerNum, pancake);
 				
-				*consumer_ptr = (*consumer_ptr + 1) % *bufferLength_ptr;
+				*consumer_ptr = (*consumer_ptr + 1) % *bufferLength_ptr; //increments consumer, makes sure the value is of acceptbale size by taking the remainder from the buffer size 
 				
-				up(lock);
-				up(full);
+				cs1550_up(lock);
+				cs1550_up(full);
 			}
 		}
 	}
@@ -122,21 +123,24 @@ void main(int argc, char *argv[])
 	
 }
 
+//starts all pointers at the starting location for the specified memory
 void initilaize_pointers(int buffSize)
 {
-	empty -> count = 0;
-	full -> count = buffSize;
-	lock -> count = 1;
+	empty -> count = 0;		//empty starts off empty (haha)
+	full -> count = buffSize;	//full is how many possible are remaining in the buffer
+	lock -> count = 1;		//our lock in class starts at 1
 	
+	//below are null becuase there is nothing in the lists yet
 	empty -> head = NULL;
 	full -> head = NULL;
 	lock -> head = NULL;
 	
-	empty -> tail = NULL:
+	empty -> tail = NULL;
 	full -> tail = NULL;
 	lock -> tail = NULL;
 }
 
+//both syscalls are taken from Mohammad's GitHub skelton codes
 void cs1550_down(struct cs1550_sem *sem) 
 {
      syscall(__NR_sys_cs1550_down, sem);
@@ -146,3 +150,4 @@ void cs1550_up(struct cs1550_sem *sem)
 {
      syscall(__NR_sys_cs1550_up, sem);
 }
+
